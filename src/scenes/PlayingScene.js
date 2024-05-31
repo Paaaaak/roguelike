@@ -3,6 +3,8 @@ import Player from "../characters/Player";
 import { setBackground } from "../utils/backgroundManager";
 import Config from "../Config";
 import { addMobEvent } from "../utils/mobManager";
+import { addAttackEvent } from "../utils/attackManager";
+import Mob from "../characters/Mob";
 
 export default class PlayingScene extends Phaser.Scene {
   constructor() {
@@ -47,6 +49,9 @@ export default class PlayingScene extends Phaser.Scene {
       right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
     };
 
+    // 마우스 클릭 이벤트 리스너 추가
+    this.input.on('pointerdown', this.onMouseClick, this);
+
     // m_mobs는 physics group으로, 속한 모든 오브젝트에 동일한 물리법칙을 적옹할 수 있습니다.
     // m_mobEvents는 mob event의 timer를 담을 배열로, mob event를 추가 및 제거할 때 사용할 것입니다.
     // addMobEvent는 m_mobEvents에 mob event의 timer를 추가해줍니다.
@@ -54,6 +59,24 @@ export default class PlayingScene extends Phaser.Scene {
     this.m_mobEvents = [];
     // scene, repeatGap, mobTexture, mobAnim, mobHp, mobDropRate
     addMobEvent(this, 1000, "mob1", "mob1_anim", 10, 0.9);
+
+    // mobs
+    this.m_mobs = this.physics.add.group();
+    // 맨 처음에 등장하는 몹을 수동으로 추가해줍니다.
+    // 추가하지 않으면 closest mob을 찾는 부분에서 에러가 발생합니다.
+    this.m_mobs.add(new Mob(this, 0, 0, "mob1", "mob1_anim", 10));
+    this.m_mobEvents = [];
+    addMobEvent(this, 1000, "mob1", "mob1_anim", 10, 0.9);
+
+    // attacks
+    // 정적인 공격과 동적인 공격의 동작 방식이 다르므로 따로 group을 만들어줍니다.
+    // attack event를 저장하는 객체도 멤버 변수로 만들어줍니다.
+    // 이는 공격 강화등에 활용될 것입니다.
+    this.m_weaponDynamic = this.add.group();
+    this.m_weaponStatic = this.add.group();
+    this.m_attackEvents = {};
+    // PlayingScene이 실행되면 바로 beam attack event를 추가해줍니다.
+    addAttackEvent(this, "beam", 10, 1, 1000);
   }
 
   update() {
@@ -66,6 +89,23 @@ export default class PlayingScene extends Phaser.Scene {
     // tilePosition을 player가 움직이는 만큼 이동시켜 마치 무한 배경인 것처럼 나타내 줍니다.
     this.m_background.tilePositionX = this.m_player.x - Config.width / 2;
     this.m_background.tilePositionY = this.m_player.y - Config.height / 2;
+
+    // player로부터 가장 가까운 mob을 구합니다.
+    // 가장 가까운 mob은 mob, player의 움직임에 따라 계속 바뀌므로 update 내에서 구해야 합니다.
+    // getChildren: group에 속한 모든 객체들의 배열을 리턴하는 메소드입니다.
+    const closest = this.physics.closest(
+      this.m_player,
+      this.m_mobs.getChildren()
+    );
+    this.m_closest = closest;
+  }
+
+  onMouseClick(pointer) {
+    // 클릭한 위치의 좌표를 출력합니다.
+    console.log('Mouse clicked at: ', pointer.x, pointer.y);
+
+    // 클릭한 위치에 텍스트를 표시합니다.
+    this.add.text(pointer.x, pointer.y, `(${pointer.x}, ${pointer.y})`, { color: '#ff0000', fontSize: '16px' }).setOrigin(0.5, 0.5);
   }
 
   // player가 움직이도록 해주는 메소드입니다.
