@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import Config from "../Config";
+import HpBar from "../ui/HpBar"
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene) {
@@ -24,6 +25,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // 플레이어가 공격받을 수 있는지 여부를 나타내는 멤버 변수입니다.
     // 공격받은 후 쿨타임을 주기 위해 사용합니다.
     this.m_canBeAttacked = true;
+
+    // HP bar를 player의 멤버 변수로 추가해줍니다.
+    this.m_hpBar = new HpBar(scene, this, 100);
   }
 
   // player가 움직이도록 하는 함수입니다.
@@ -52,6 +56,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.scene.m_hurtSound.play();
     // 쿨타임을 갖습니다.
     this.getCooldown();
+    // mob과 접촉했을 때 damage만큼 HP를 감소시켜줍니다.
+    this.m_hpBar.decrease(damage);
+
+    // HP가 0이 되면 게임오버! (다음 챕터에서 수정할 것입니다.)
+    if (this.m_hpBar.m_currentHp <= 0) {
+      console.log('GAME OVER');
+    }
   }
 
   // 공격받은 후 1초 쿨타임을 갖게 하는 함수입니다.
