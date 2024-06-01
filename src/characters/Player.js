@@ -20,6 +20,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // 해당 오브젝트가 물리적으로 얼만큼의 면적을 차지할 지 설정하는 함수입니다.
     // 디폴트로 이미지 사이즈로 설정되는데, 그러면 추후 몹을 추가했을 때 너무 잘 부딪히는 느낌이 드므로 원본 이미지보다 약간 작게 설정해주었습니다.
     this.setBodySize(28, 32);
+
+    // 플레이어가 공격받을 수 있는지 여부를 나타내는 멤버 변수입니다.
+    // 공격받은 후 쿨타임을 주기 위해 사용합니다.
+    this.m_canBeAttacked = true;
   }
 
   // player가 움직이도록 하는 함수입니다.
@@ -37,5 +41,32 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // player가 오른쪽쪽으로 이동할 때는 flipX = true로 설정해 적절한 방향을 바라보게 해 줍니다.
     if (vector[0] === -1) this.flipX = false;
     else if (vector[0] === 1) this.flipX = true;
+  }
+
+  // 몹과 접촉했을 경우 실행되는 함수입니다.
+  hitByMob(damage) {
+    // 쿨타임이었던 경우 공격받지 않습니다.
+    if (!this.m_canBeAttacked) return;
+
+    // 플레이어가 다친 소리를 재생합니다.
+    this.scene.m_hurtSound.play();
+    // 쿨타임을 갖습니다.
+    this.getCooldown();
+  }
+
+  // 공격받은 후 1초 쿨타임을 갖게 하는 함수입니다.
+  // 공격받을 수 있는지 여부와 투명도를 1초동안 조절합니다.
+  getCooldown() {
+    this.m_canBeAttacked = false;
+    this.alpha = 0.5;
+    this.scene.time.addEvent({
+      delay: 1000,
+      callback: () => {
+        this.alpha = 1;
+        this.m_canBeAttacked = true;
+      },
+      callbackScope: this,
+      loop: false,
+    });
   }
 }
