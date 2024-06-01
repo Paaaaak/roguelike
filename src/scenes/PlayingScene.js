@@ -5,6 +5,8 @@ import Config from "../Config";
 import { addMobEvent } from "../utils/mobManager";
 import { addAttackEvent } from "../utils/attackManager";
 import Mob from "../characters/Mob";
+import TopBar from "../ui/TopBar";
+import ExpBar from "../ui/ExpBar";
 
 export default class PlayingScene extends Phaser.Scene {
   constructor() {
@@ -119,6 +121,23 @@ export default class PlayingScene extends Phaser.Scene {
       null,
       this
     );
+
+    // exp up item들을 담을 physics group을 추가해줍니다.
+    this.m_expUps = this.physics.add.group();
+
+    // player와 expUp이 접촉했을 때 pickExpUp 메소드가 동작하도록 합니다.
+    this.physics.add.overlap(
+      this.m_player,
+      this.m_expUps,
+      this.pickExpUp,
+      null,
+      this
+    );
+
+    // topBar, expBar를 PlayingScene에 추가해줍니다. 
+    // 맨 처음 maxExp는 50으로 설정해줍니다.
+    this.m_topBar = new TopBar(this);
+    this.m_expBar = new ExpBar(this, 50);
   }
 
   update() {
@@ -229,5 +248,22 @@ export default class PlayingScene extends Phaser.Scene {
 
     // vector를 player 클래스의 메소드의 파라미터로 넘겨줍니다.
     this.m_player.move(vector);
+  }
+
+  // player와 expUp이 접촉했을 때 실행되는 메소드입니다.
+  pickExpUp(player, expUp) {
+    // expUp을 비활성화하고 화면에 보이지 않게 합니다.
+    expUp.disableBody(true, true);
+    // expUp을 제거합니다.
+    expUp.destroy();
+
+    // 소리를 재생합니다.
+    this.m_expUpSound.play();
+    // expUp item을 먹으면 expBar의 경험치를 아이템의 m_exp 값만큼 증가시켜줍니다.
+    this.m_expBar.increase(expUp.m_exp);
+    // 만약 현재 경험치가 maxExp 이상이면 레벨을 증가시켜줍니다.
+    if (this.m_expBar.m_currentExp >= this.m_expBar.m_maxExp) {
+      this.m_topBar.gainLevel();
+    }
   }
 }
