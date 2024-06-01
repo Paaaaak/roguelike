@@ -1,7 +1,7 @@
 import LoadingScene from "./scenes/LoadingScene";
 // import MainScene from "./scenes/MainScene";
 import PlayingScene from "./scenes/PlayingScene";
-// import GameOverScene from "./scenes/GameOverScene";
+import GameOverScene from "./scenes/GameOverScene";
 // import GameClearScene from "./scenes/GameClearScene";
 
 const Config = {
@@ -11,7 +11,7 @@ const Config = {
   backgroundColor: 0x000000,
 
   // 사용할 scene은 config의 scene 프로퍼티의 배열에 추가해줘야 합니다.
-  scene: [LoadingScene, PlayingScene],
+  scene: [LoadingScene, PlayingScene, GameOverScene],
 
   // pixelArt를 사용할 경우 pixelArt: true로 설정해야 선명하게 보입니다.
   pixelArt: true,
