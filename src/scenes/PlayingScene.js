@@ -9,6 +9,7 @@ import Mob from "../characters/Mob";
 export default class PlayingScene extends Phaser.Scene {
   constructor() {
     super("playGame");
+    this.isMousePressed = false; // Flag to track mouse state
   }
 
   create() {
@@ -49,15 +50,14 @@ export default class PlayingScene extends Phaser.Scene {
       right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
     };
 
-    // 마우스 클릭 이벤트 리스너 추가
-    this.input.on('pointerdown', this.onMouseClick, this);
+    this.input.on('pointerdown', this.onMouseDown, this);
+    this.input.on('pointerup', this.onMouseUp, this);
 
     // m_mobs는 physics group으로, 속한 모든 오브젝트에 동일한 물리법칙을 적옹할 수 있습니다.
     // m_mobEvents는 mob event의 timer를 담을 배열로, mob event를 추가 및 제거할 때 사용할 것입니다.
     // addMobEvent는 m_mobEvents에 mob event의 timer를 추가해줍니다.
     this.m_mobs = this.physics.add.group();
     this.m_mobEvents = [];
-    // scene, repeatGap, mobTexture, mobAnim, mobHp, mobDropRate
     addMobEvent(this, 1000, "mob1", "mob1_anim", 10, 0.9);
 
     // mobs
@@ -87,19 +87,59 @@ export default class PlayingScene extends Phaser.Scene {
     // tilePosition을 player가 움직이는 만큼 이동시켜 마치 무한 배경인 것처럼 나타내 줍니다.
     this.m_background.tilePositionX = this.m_player.x - Config.width / 2;
     this.m_background.tilePositionY = this.m_player.y - Config.height / 2;
+
+    if (this.isMousePressed) {
+      const pointer = this.input.activePointer;
+      const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+
+      this.m_click_coordinate = {
+        x: worldPoint.x,
+        y: worldPoint.y
+      };
+
+      // Start attack timer if not already started
+      if (!this.attackTimer) {
+        console.log('attack timer');
+
+        this.attackTimer = this.time.addEvent({
+          delay: 120, // 1 second
+          callback: this.handleContinuousAttack,
+          callbackScope: this,
+          loop: true // Repeat indefinitely
+        });
+      }
+    } else {
+      // Stop attack timer if mouse button released
+      if (this.attackTimer) {
+        this.attackTimer.destroy();
+        this.attackTimer = null;
+      }
+    }
   }
 
-  onMouseClick(pointer) {
-    const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+  onMouseDown(pointer) {
+    console.log('mouse down')
+    this.isMousePressed = true;
 
+    this.handleMouseClick(pointer);
+  }
+
+  onMouseUp(pointer) {
+    this.isMousePressed = false;
+  }
+  
+  handleMouseClick(pointer) {
+    const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
     this.m_click_coordinate = {
       x: worldPoint.x,
       y: worldPoint.y
-    }
-
+    };
     addAttackEvent(this, "beam", 10, 1);
   }
-  
+
+  handleContinuousAttack() {
+    addAttackEvent(this, "beam", 10, 1);
+  }
 
   // player가 움직이도록 해주는 메소드입니다.
   movePlayerManager() {

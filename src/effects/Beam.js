@@ -16,7 +16,7 @@ export default class Beam extends Phaser.Physics.Arcade.Sprite {
     // 동적 공격 그룹에 beam을 추가합니다.
     scene.m_weaponDynamic.add(this);
     // beam을 쏘는 소리를 재생합니다.
-    scene.m_beamSound.play();
+    // scene.m_beamSound.play();
 
     // 데미지, 크기, depth를 설정합니다.
     this.m_damage = damage;
@@ -38,7 +38,6 @@ export default class Beam extends Phaser.Physics.Arcade.Sprite {
 
   // beam이 가장 가까운 mob으로 날아가도록 속도를 설정해주는 메소드입니다.
   setVelocity(targetPosition) {
-    console.log('clicked:', targetPosition.x + this.x, targetPosition.y + this.y, 'me:', this.x, this.y);
 
     const _x = targetPosition.x - this.x;
     const _y = targetPosition.y - this.y;
