@@ -75,8 +75,6 @@ export default class PlayingScene extends Phaser.Scene {
     this.m_weaponDynamic = this.add.group();
     this.m_weaponStatic = this.add.group();
     this.m_attackEvents = {};
-    // PlayingScene이 실행되면 바로 beam attack event를 추가해줍니다.
-    addAttackEvent(this, "beam", 10, 1, 1000);
   }
 
   update() {
@@ -89,24 +87,32 @@ export default class PlayingScene extends Phaser.Scene {
     // tilePosition을 player가 움직이는 만큼 이동시켜 마치 무한 배경인 것처럼 나타내 줍니다.
     this.m_background.tilePositionX = this.m_player.x - Config.width / 2;
     this.m_background.tilePositionY = this.m_player.y - Config.height / 2;
-
-    // player로부터 가장 가까운 mob을 구합니다.
-    // 가장 가까운 mob은 mob, player의 움직임에 따라 계속 바뀌므로 update 내에서 구해야 합니다.
-    // getChildren: group에 속한 모든 객체들의 배열을 리턴하는 메소드입니다.
-    const closest = this.physics.closest(
-      this.m_player,
-      this.m_mobs.getChildren()
-    );
-    this.m_closest = closest;
   }
 
   onMouseClick(pointer) {
-    // 클릭한 위치의 좌표를 출력합니다.
-    console.log('Mouse clicked at: ', pointer.x, pointer.y);
 
     // 클릭한 위치에 텍스트를 표시합니다.
     this.add.text(pointer.x, pointer.y, `(${pointer.x}, ${pointer.y})`, { color: '#ff0000', fontSize: '16px' }).setOrigin(0.5, 0.5);
+  
+
+    // Get the main camera
+    const camera = this.cameras.main;
+
+    // Convert the pointer position to world coordinates
+    const worldPoint = camera.getWorldPoint(pointer.x, pointer.y);
+
+    // Log or use the world coordinates as needed
+
+
+    this.m_closest = {
+      x: worldPoint.x,
+      y: worldPoint.y
+    }
+
+    // PlayingScene이 실행되면 바로 beam attack event를 추가해줍니다.
+    addAttackEvent(this, "beam", 10, 1);
   }
+  
 
   // player가 움직이도록 해주는 메소드입니다.
   movePlayerManager() {

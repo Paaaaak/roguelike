@@ -3,7 +3,7 @@ import Phaser from "phaser";
 export default class Beam extends Phaser.Physics.Arcade.Sprite {
   // Beam 클래스는 constructor 파라미터로 x, y 대신 startingPosition을 받습니다.
   // startingPosition = [x, y]인 배열입니다.
-  constructor(scene, startingPosition, damage, scale) {
+  constructor(scene, startingPosition, damage, scale, targetPosition) {
     super(scene, startingPosition[0], startingPosition[1], "beam");
 
     // beam의 속도, 지속시간을 적당히 설정해줍니다.
@@ -23,8 +23,8 @@ export default class Beam extends Phaser.Physics.Arcade.Sprite {
     this.scale = scale;
     this.setDepth(30);
     // velocity, angle을 설정합니다. 이는 저희가 직접 정의할 메소드입니다.
-    this.setVelocity();
-    this.setAngle();
+    this.setVelocity(targetPosition);
+    this.setAngle(targetPosition);
 
     // Beam은 DURATION만큼 시간이 지나면 제거됩니다.
     scene.time.addEvent({
@@ -37,16 +37,11 @@ export default class Beam extends Phaser.Physics.Arcade.Sprite {
   }
 
   // beam이 가장 가까운 mob으로 날아가도록 속도를 설정해주는 메소드입니다.
-  setVelocity() {
-    // 가장 가까운 mob이 없을 경우 beam이 위로 날아가도록 해 줍니다.
-    if (!this.scene.m_closest) {
-      // https://newdocs.phaser.io/docs/3.55.0/Phaser.GameObjects.Particles.Particle#velocityX
-      // -250은 속도입니다. 속도는 방향과 속력을 함께 가지고 있습니다.
-      this.setVelocityY(-250);
-      return;
-    }
-    const _x = this.scene.m_closest.x - this.x;
-    const _y = this.scene.m_closest.y - this.y;
+  setVelocity(targetPosition) {
+    console.log('clicked:', targetPosition.x + this.x, targetPosition.y + this.y, 'me:', this.x, this.y);
+
+    const _x = targetPosition.x - this.x;
+    const _y = targetPosition.y - this.y;
     const _r = Math.sqrt(_x * _x + _y * _y) / 2;
     this.body.velocity.x = (_x / _r) * this.SPEED;
     this.body.velocity.y = (_y / _r) * this.SPEED;
@@ -54,13 +49,13 @@ export default class Beam extends Phaser.Physics.Arcade.Sprite {
 
   // beam이 mob에 날아갈 때 beam 이미지의 각도를 설정해주는 메소드입니다.
   // 설정하지 않아도 기능적으로는 무방하지만 beam의 모습이 어색해집니다.
-  setAngle() {
+  setAngle(targetPosition) {
     // 라이캣과 몹 사이의 각도입니다.
     const angleToMob = Phaser.Math.Angle.Between(
       this.x,
       this.y,
-      this.scene.m_closest.x,
-      this.scene.m_closest.y
+      targetPosition.x,
+      targetPosition.y
     );
 
     // beam 이미지의 각도를 설정해주는 부분입니다.

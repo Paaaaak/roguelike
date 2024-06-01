@@ -13,28 +13,19 @@ export function addAttackEvent(
   scene,
   attackType,
   attackDamage,
-  attackScale,
-  repeatGap
+  attackScale
 ) {
   // 다양한 attackType이 생길 것을 대비하여 switch case 문을 사용합니다.
   switch (attackType) {
     case "beam":
-      const timerBeam = scene.time.addEvent({
-        delay: repeatGap,
-        callback: () => {
-          shootBeam(scene, attackDamage, attackScale);
-        },
-        loop: true, // 무한 반복해줍니다.
-      });
-      // PlayingScene의 m_attackEvents 객체에 키는 'beam', 밸류는 beam 공격의 timer로 프로퍼티를 추가해줍니다.
-      scene.m_attackEvents.beam = timerBeam;
+      shootBeam(scene, attackDamage, attackScale);
       break;
   }
 }
 
 // Beam을 쏘는 함수입니다.
 function shootBeam(scene, damage, scale) {
-  new Beam(scene, [scene.m_player.x, scene.m_player.y - 16], damage, scale);
+  new Beam(scene, [scene.m_player.x, scene.m_player.y - 16], damage, scale, scene.m_closest);
 }
 
 // scene에 있는 attackType의 공격을 제거해주는 함수입니다.
