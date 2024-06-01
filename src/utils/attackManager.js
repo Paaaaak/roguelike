@@ -25,7 +25,7 @@ export function addAttackEvent(
 
 // Beam을 쏘는 함수입니다.
 function shootBeam(scene, damage, scale) {
-  new Beam(scene, [scene.m_player.x, scene.m_player.y - 16], damage, scale, scene.m_closest);
+  new Beam(scene, [scene.m_player.x, scene.m_player.y - 16], damage, scale, scene.m_click_coordinate);
 }
 
 // scene에 있는 attackType의 공격을 제거해주는 함수입니다.

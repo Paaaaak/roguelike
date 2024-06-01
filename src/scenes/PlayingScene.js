@@ -90,26 +90,13 @@ export default class PlayingScene extends Phaser.Scene {
   }
 
   onMouseClick(pointer) {
+    const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
 
-    // 클릭한 위치에 텍스트를 표시합니다.
-    this.add.text(pointer.x, pointer.y, `(${pointer.x}, ${pointer.y})`, { color: '#ff0000', fontSize: '16px' }).setOrigin(0.5, 0.5);
-  
-
-    // Get the main camera
-    const camera = this.cameras.main;
-
-    // Convert the pointer position to world coordinates
-    const worldPoint = camera.getWorldPoint(pointer.x, pointer.y);
-
-    // Log or use the world coordinates as needed
-
-
-    this.m_closest = {
+    this.m_click_coordinate = {
       x: worldPoint.x,
       y: worldPoint.y
     }
 
-    // PlayingScene이 실행되면 바로 beam attack event를 추가해줍니다.
     addAttackEvent(this, "beam", 10, 1);
   }
   
