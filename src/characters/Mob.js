@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import Config from "../Config";
+import Explosion from "../effects/Explosion";
 
 export default class Mob extends Phaser.Physics.Arcade.Sprite {
   /**
@@ -75,6 +75,11 @@ export default class Mob extends Phaser.Physics.Arcade.Sprite {
     // 오른쪽으로 향할 때는 오른쪽을, 왼쪽으로 향할 때는 왼쪽을 바라보도록 해줍니다.
     if (this.x < this.scene.m_player.x) this.flipX = true;
     else this.flipX = false;
+
+    // HP가 0 이하가 되면 죽습니다.
+    if (this.m_hp <= 0) {
+      this.die();
+    }
   }
 
   // mob이 dynamic attack에 맞을 경우 실행되는 함수입니다.
@@ -132,5 +137,17 @@ export default class Mob extends Phaser.Physics.Arcade.Sprite {
       },
       loop: false,
     });
+  }
+
+  die() {
+    // 폭발 효과를 발생시킵니다. (이미지, 소리)
+    new Explosion(this.scene, this.x, this.y);
+    this.scene.m_explosionSound.play();
+
+    // player 쪽으로 움직이게 만들었던 event를 제거합니다.
+    this.scene.time.removeEvent(this.m_events);
+
+    // mob 객체를 제거합니다.
+    this.destroy();
   }
 }

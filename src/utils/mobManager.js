@@ -21,19 +21,19 @@ export function addMobEvent(
   mobHp,
   mobDropRate
 ) {
-  // let timer = scene.time.addEvent({
-  //   delay: repeatGap,
-  //   callback: () => {
-  //     // mob이 화면 바깥에서 나타나도록 해줍니다.
-  //     let [x, y] = getRandomPosition(scene.m_player.x, scene.m_player.y);
-  //     scene.m_mobs.add(
-  //       new Mob(scene, x, y, mobTexture, mobAnim, mobHp, mobDropRate)
-  //     );
-  //   },
-  //   loop: true,
-  // });
+  let timer = scene.time.addEvent({
+    delay: repeatGap,
+    callback: () => {
+      // mob이 화면 바깥에서 나타나도록 해줍니다.
+      let [x, y] = getRandomPosition(scene.m_player.x, scene.m_player.y);
+      scene.m_mobs.add(
+        new Mob(scene, x, y, mobTexture, mobAnim, mobHp, mobDropRate)
+      );
+    },
+    loop: true,
+  });
 
-  // scene.m_mobEvents.push(timer);
+  scene.m_mobEvents.push(timer);
 }
 
 // 가장 오래된 mob event를 지우는 함수입니다.
