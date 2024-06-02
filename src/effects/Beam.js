@@ -44,6 +44,7 @@ export default class Beam extends Phaser.Physics.Arcade.Sprite {
     const _r = Math.sqrt(_x * _x + _y * _y) / 2;
     this.body.velocity.x = (_x / _r) * this.SPEED;
     this.body.velocity.y = (_y / _r) * this.SPEED;
+    console.log('beam', this)
   }
 
   // beam이 mob에 날아갈 때 beam 이미지의 각도를 설정해주는 메소드입니다.

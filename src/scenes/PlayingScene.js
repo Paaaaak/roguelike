@@ -61,7 +61,7 @@ export default class PlayingScene extends Phaser.Scene {
     // addMobEvent는 m_mobEvents에 mob event의 timer를 추가해줍니다.
     this.m_mobs = this.physics.add.group();
     this.m_mobEvents = [];
-    addMobEvent(this, 1000, "mob1", "mob1_anim", 10, 0.9);
+    addMobEvent(this, 1000, "mob1", "mob1_anim", 109, 0.9);
 
     // mobs
     this.m_mobs = this.physics.add.group();
@@ -69,7 +69,7 @@ export default class PlayingScene extends Phaser.Scene {
     // 추가하지 않으면 closest mob을 찾는 부분에서 에러가 발생합니다.
     this.m_mobs.add(new Mob(this, 0, 0, "mob1", "mob1_anim", 10));
     this.m_mobEvents = [];
-    addMobEvent(this, 1000, "mob1", "mob1_anim", 10, 0.9);
+    addMobEvent(this, 1000, "mob1", "mob1_anim", 109, 0.9);
 
     // attacks
     // 정적인 공격과 동적인 공격의 동작 방식이 다르므로 따로 group을 만들어줍니다.
@@ -105,7 +105,7 @@ export default class PlayingScene extends Phaser.Scene {
       this.m_weaponDynamic,
       this.m_mobs,
       (weapon, mob) => {
-        mob.hitByDynamic(weapon, weapon.m_damage);
+        mob.hitByDynamic(weapon, weapon.m_damage, this.m_mobs);
       },
       null,
       this
@@ -167,19 +167,15 @@ export default class PlayingScene extends Phaser.Scene {
         y: worldPoint.y
       };
 
-      // Start attack timer if not already started
       if (!this.attackTimer) {
-        console.log('attack timer');
-
         this.attackTimer = this.time.addEvent({
-          delay: 150, // 1 second
+          delay: 150,
           callback: this.handleContinuousAttack,
           callbackScope: this,
-          loop: true // Repeat indefinitely
+          loop: true
         });
       }
     } else {
-      // Stop attack timer if mouse button released
       if (this.attackTimer) {
         this.attackTimer.destroy();
         this.attackTimer = null;
@@ -188,9 +184,7 @@ export default class PlayingScene extends Phaser.Scene {
   }
 
   onMouseDown(pointer) {
-    console.log('mouse down')
     this.isMousePressed = true;
-
     this.handleMouseClick(pointer);
   }
 
@@ -255,6 +249,11 @@ export default class PlayingScene extends Phaser.Scene {
 
     // vector를 player 클래스의 메소드의 파라미터로 넘겨줍니다.
     this.m_player.move(vector);
+
+    // static 공격들은 player가 이동하면 그대로 따라오도록 해줍니다.
+    this.m_weaponStatic.children.each(weapon => {
+      weapon.move(vector);
+    }, this);
   }
 
   // player와 expUp이 접촉했을 때 실행되는 메소드입니다.
@@ -283,19 +282,19 @@ export default class PlayingScene extends Phaser.Scene {
     // 이전 몹 이벤트를 지우지 않으면 난이도가 너무 어려워지기 때문에 이전 몹 이벤트를 지워줍니다.
     // 레벨이 높아질 수록 강하고 아이텝 드랍율이 낮은 몹을 등장시킵니다.
     // repeatGap은 동일하게 설정했지만 레벨이 올라갈수록 더 짧아지도록 조절하셔도 됩니다.
-    switch (this.m_topBar.m_level) {
-      case 2:
-        removeOldestMobEvent(this);
-        addMobEvent(this, 1000, "mob2", "mob2_anim", 20, 0.8);
-        break;
-      case 3:
-        removeOldestMobEvent(this);
-        addMobEvent(this, 1000, "mob3", "mob3_anim", 30, 0.7);
-        break;
-      case 4:
-        removeOldestMobEvent(this);
-        addMobEvent(this, 1000, "mob4", "mob4_anim", 40, 0.7);
-        break;
-    }
+    // switch (this.m_topBar.m_level) {
+    //   case 2:
+    //     removeOldestMobEvent(this);
+    //     addMobEvent(this, 1000, "mob2", "mob2_anim", 20, 0.8);
+    //     break;
+    //   case 3:
+    //     removeOldestMobEvent(this);
+    //     addMobEvent(this, 1000, "mob3", "mob3_anim", 30, 0.7);
+    //     break;
+    //   case 4:
+    //     removeOldestMobEvent(this);
+    //     addMobEvent(this, 1000, "mob4", "mob4_anim", 40, 0.7);
+    //     break;
+    // }
   }
 }
