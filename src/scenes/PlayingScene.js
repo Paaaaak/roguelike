@@ -7,6 +7,7 @@ import { addAttackEvent } from "../utils/attackManager";
 import Mob from "../characters/Mob";
 import TopBar from "../ui/TopBar";
 import ExpBar from "../ui/ExpBar";
+import { pause } from "../utils/pauseManager";
 
 export default class PlayingScene extends Phaser.Scene {
   constructor() {
@@ -138,6 +139,12 @@ export default class PlayingScene extends Phaser.Scene {
     // 맨 처음 maxExp는 50으로 설정해줍니다.
     this.m_topBar = new TopBar(this);
     this.m_expBar = new ExpBar(this, 50);
+
+    this.input.keyboard.on(
+      "keydown-ESC",
+      () => { pause(this, "pause"); },
+      this
+    );
   }
 
   update() {
@@ -261,9 +268,15 @@ export default class PlayingScene extends Phaser.Scene {
     this.m_expUpSound.play();
     // expUp item을 먹으면 expBar의 경험치를 아이템의 m_exp 값만큼 증가시켜줍니다.
     this.m_expBar.increase(expUp.m_exp);
-    // 만약 현재 경험치가 maxExp 이상이면 레벨을 증가시켜줍니다.
     if (this.m_expBar.m_currentExp >= this.m_expBar.m_maxExp) {
-      this.m_topBar.gainLevel();
+      // maxExp를 초과하면 레벨업을 해주던 기존의 코드를 지우고
+      // afterLevelUp 메소드를 만들어 거기에 옮겨줍니다.
+      // 추후 레벨에 따른 몹, 무기 추가를 afterLevelUp에서 실행해 줄 것입니다.
+      pause(this, "levelup");
     }
+  }
+
+  afterLevelUp() {
+    this.m_topBar.gainLevel();
   }
 }
